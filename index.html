@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Power BI Test Login</title>
+  <script src="https://cdn.jsdelivr.net/npm/powerbi-client@2.23.1/dist/powerbi.min.js"></script>
+</head>
+<body>
+
+  <h2>Login to View Dashboard</h2>
+
+  <input type="email" id="email" placeholder="Enter your email" />
+  <button onclick="login()">Login</button>
+
+  <hr/>
+
+  <div id="reportContainer" style="height:600px;"></div>
+
+  <script>
+    async function login() {
+
+      const email = document.getElementById("email").value;
+
+      const response = await fetch("https://naqaa-powerbi-api-hbd8dbatg8gac5er.westeurope-01.azurewebsites.net/api/generateEmbedToken?code=MuSVbAxTWxS5X0oDRJOzug1Rkc7ULg-DakM1aOGwfIftAzFuGiYTWA==", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email })
+      });
+
+      const data = await response.json();
+
+      if (!data.token) {
+        alert("Token not generated");
+        return;
+      }
+
+      embedReport(data.token);
+    }
+
+    function embedReport(embedToken) {
+
+      const models = window['powerbi-client'].models;
+
+      const config = {
+        type: 'report',
+        tokenType: models.TokenType.Embed,
+        accessToken: embedToken,
+        embedUrl: "https://app.powerbi.com/reportEmbed?reportId=f1a3ea68-b3ae-490b-ab65-195b69ffdaaa&groupId=ae743207-85da-4574-b82c-4a309b65d4e0",
+        id: "f1a3ea68-b3ae-490b-ab65-195b69ffdaaa",
+        settings: {
+          panes: {
+            filters: { visible: false }
+          }
+        }
+      };
+
+      const reportContainer = document.getElementById('reportContainer');
+      powerbi.embed(reportContainer, config);
+    }
+  </script>
+
+</body>
+</html>
